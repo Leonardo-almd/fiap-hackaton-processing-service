@@ -1,0 +1,26 @@
+# Maven
+target/
+*.class
+*.jar
+*.war
+
+# Spring Boot
+*.log
+spring-shell.log
+
+# IDE
+.idea/
+*.iml
+.vscode/
+*.swp
+.DS_Store
+
+# Docker
+.docker/
+
+# Secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key

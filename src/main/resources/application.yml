@@ -1,0 +1,46 @@
+spring:
+  application:
+    name: processing-service
+
+server:
+  port: 8081
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+
+aws:
+  region: ${AWS_REGION:us-east-1}
+  endpoint-override: ${AWS_ENDPOINT_OVERRIDE:}
+  s3:
+    bucket-name: ${S3_BUCKET_NAME:fiap-diagrams}
+  sqs:
+    queue-url: ${SQS_QUEUE_URL:http://localhost:4566/000000000000/diagram-analysis}
+    polling-interval-ms: 5000
+    max-messages: 5
+    visibility-timeout: 60
+
+upload-service:
+  base-url: ${UPLOAD_SERVICE_BASE_URL:http://localhost:8080}
+
+report-service:
+  base-url: ${REPORT_SERVICE_BASE_URL:http://localhost:8082}
+
+ai:
+  # "stub" usa dados mockados (Fase 1 - SOAT). "bedrock" usa Amazon Bedrock (Fase 2 - IADT).
+  adapter: ${AI_ADAPTER:stub}
+  bedrock:
+    model-id: ${BEDROCK_MODEL_ID:anthropic.claude-3-sonnet-20240229-v1:0}
+    region: ${BEDROCK_REGION:us-east-1}
+
+logging:
+  pattern:
+    console: '{"timestamp":"%d{yyyy-MM-dd HH:mm:ss.SSS}","level":"%level","service":"processing-service","traceId":"%X{traceId}","jobId":"%X{jobId}","message":"%msg"}%n'
+  level:
+    br.com.fiap: INFO
+    org.springframework: WARN
