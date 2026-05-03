@@ -18,7 +18,7 @@ aws:
   region: ${AWS_REGION:us-east-1}
   endpoint-override: ${AWS_ENDPOINT_OVERRIDE:}
   s3:
-    bucket-name: ${S3_BUCKET_NAME:fiap-diagrams}
+    bucket-name: ${S3_BUCKET:fiap-diagrams}
   sqs:
     queue-url: ${SQS_QUEUE_URL:http://localhost:4566/000000000000/diagram-analysis}
     polling-interval-ms: 5000
@@ -26,10 +26,10 @@ aws:
     visibility-timeout: 60
 
 upload-service:
-  base-url: ${UPLOAD_SERVICE_BASE_URL:http://localhost:8080}
+  base-url: ${UPLOAD_SERVICE_URL:http://localhost:8080}
 
 report-service:
-  base-url: ${REPORT_SERVICE_BASE_URL:http://localhost:8082}
+  base-url: ${REPORT_SERVICE_URL:http://localhost:8082}
 
 ai:
   # "stub" usa dados mockados (Fase 1 - SOAT). "bedrock" usa Amazon Bedrock (Fase 2 - IADT).
