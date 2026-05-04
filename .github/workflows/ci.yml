@@ -11,6 +11,7 @@ env:
   JAVA_VERSION: "21"
   MAVEN_OPTS: "-Xmx1024m"
   SERVICE_NAME: processing-service
+  SONAR_ENABLED: ${{ vars.SONAR_ENABLED || 'false' }}
 
 jobs:
   build:
@@ -142,7 +143,9 @@ jobs:
     name: SonarCloud Analysis
     runs-on: ubuntu-latest
     needs: build
-    if: ${{ secrets.SONAR_TOKEN != '' }}
+    if: ${{ env.SONAR_ENABLED == 'true' }}
+    env:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -167,7 +170,7 @@ jobs:
             -Dsonar.organization=${{ vars.SONAR_ORGANIZATION }}
             -Dsonar.projectKey=${{ vars.SONAR_PROJECT_KEY }}
         env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_TOKEN: ${{ env.SONAR_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: SonarCloud Summary
