@@ -1,8 +1,11 @@
 name: CD — processing-service
 
 on:
-  push:
+  workflow_run:
+    workflows: ["CI — processing-service"]
     branches: [main]
+    types:
+      - completed
   workflow_dispatch:
 
 env:
@@ -16,6 +19,7 @@ jobs:
   prepare:
     name: Prepare Release
     runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
     outputs:
       image_tag: ${{ steps.version.outputs.image_tag }}
     steps:
@@ -50,6 +54,8 @@ jobs:
     name: Build and Publish Image
     runs-on: ubuntu-latest
     needs: prepare
+    outputs:
+      image_uri: ${{ steps.publish_image.outputs.image_uri }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -98,11 +104,25 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
+      - name: Download ECS task definition
+        run: |
+          aws ecs describe-task-definition \
+            --task-definition ${{ env.ECS_SERVICE }} \
+            --query taskDefinition > task-definition.json
+
+      - name: Update ECS task definition with new image
+        id: task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: task-definition.json
+          container-name: ${{ env.CONTAINER_NAME }}
+          image: ${{ needs.publish.outputs.image_uri }}
+
       - name: Deploy to ECS
         id: ecs_deploy
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
-          task-definition: ${{ steps.publish_image.outputs.image_uri }}
+          task-definition: ${{ steps.task-def.outputs.task-definition }}
           service: ${{ env.ECS_SERVICE }}
           cluster: ${{ env.ECS_CLUSTER }}
           wait-for-service-stability: true
@@ -115,7 +135,7 @@ jobs:
             echo
             echo "| Item | Valor |"
             echo "|---|---|"
-            echo "| Image | ${{ steps.publish_image.outputs.image_uri }} |"
+            echo "| Image | ${{ needs.publish.outputs.image_uri }} |"
             echo "| Service | ${{ env.ECS_SERVICE }} |"
             echo "| Cluster | ${{ env.ECS_CLUSTER }} |"
             echo "| Result | ${{ steps.ecs_deploy.outcome }} |"
