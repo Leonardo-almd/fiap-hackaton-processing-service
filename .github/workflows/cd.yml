@@ -95,6 +95,7 @@ jobs:
   deploy:
     name: Deploy to ECS Fargate
     runs-on: ubuntu-latest
+    timeout-minutes: 4
     needs: [prepare, publish]
     steps:
       - name: Configure AWS credentials
