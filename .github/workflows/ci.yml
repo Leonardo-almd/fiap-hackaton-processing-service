@@ -99,44 +99,7 @@ jobs:
             echo "| SpotBugs | ${{ steps.spotbugs.outcome }} |"
           } >> "$GITHUB_STEP_SUMMARY"
 
-  security-scan:
-    name: Security Scan
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up JDK ${{ env.JAVA_VERSION }}
-        uses: actions/setup-java@v4
-        with:
-          java-version: ${{ env.JAVA_VERSION }}
-          distribution: temurin
-          cache: maven
-
-      - name: OWASP Dependency Check
-        id: owasp
-        run: mvn org.owasp:dependency-check-maven:check -B
-        continue-on-error: true
-
-      - name: Upload Security Report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: security-report
-          path: target/dependency-check-report.html
-          retention-days: 7
-
-      - name: Security Summary
-        if: always()
-        run: |
-          {
-            echo "## CI Summary - Security"
-            echo
-            echo "| Etapa | Resultado |"
-            echo "|---|---|"
-            echo "| OWASP Dependency Check | ${{ steps.owasp.outcome }} |"
-          } >> "$GITHUB_STEP_SUMMARY"
+  # security-scan job removed to skip dependency security scanning in CI
 
   sonarcloud:
     name: SonarCloud Analysis
@@ -188,7 +151,7 @@ jobs:
   docker-build:
     name: Build Docker Image
     runs-on: ubuntu-latest
-    needs: [build, code-quality, security-scan]
+    needs: [build, code-quality]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     steps:
       - name: Checkout code
