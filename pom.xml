@@ -24,6 +24,8 @@
         <aws-sdk.version>2.28.0</aws-sdk.version>
         <testcontainers.version>1.20.3</testcontainers.version>
         <pdfbox.version>3.0.3</pdfbox.version>
+        <!-- Override para compatibilidade com Java 24+ -->
+        <lombok.version>1.18.38</lombok.version>
     </properties>
 
     <dependencyManagement>
