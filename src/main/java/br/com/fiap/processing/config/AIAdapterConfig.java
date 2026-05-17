@@ -4,12 +4,16 @@ import br.com.fiap.processing.adapter.out.ai.bedrock.BedrockAIAdapter;
 import br.com.fiap.processing.adapter.out.ai.stub.StubAIAdapter;
 import br.com.fiap.processing.domain.port.out.AIAnalysisPort;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import java.time.Duration;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
 import software.amazon.awssdk.core.SdkBytes;
+import software.amazon.awssdk.http.apache.ApacheHttpClient;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.bedrockruntime.BedrockRuntimeClient;
 import software.amazon.awssdk.services.bedrockruntime.model.InvokeModelRequest;
@@ -18,12 +22,13 @@ import software.amazon.awssdk.services.bedrockruntime.model.InvokeModelRequest;
  * Seleciona a implementação de IA com base na propriedade {@code ai.adapter}.
  *
  * <ul>
- *   <li>{@code stub}    → {@link StubAIAdapter} (Fase 1 — SOAT)
- *   <li>{@code bedrock} → {@link BedrockAIAdapter} (Fase 2 — IADT)
+ * <li>{@code stub} → {@link StubAIAdapter} (Fase 1 — SOAT)
+ * <li>{@code bedrock} → {@link BedrockAIAdapter} (Fase 2 — IADT)
  * </ul>
  *
  * O {@link BedrockRuntimeClient} é construído de forma lazy apenas quando
- * {@code ai.adapter=bedrock}, evitando conexões desnecessárias ao AWS em modo stub.
+ * {@code ai.adapter=bedrock}, evitando conexões desnecessárias ao AWS em modo
+ * stub.
  */
 @Configuration
 public class AIAdapterConfig {
@@ -48,6 +53,8 @@ public class AIAdapterConfig {
                 BedrockRuntimeClient client = BedrockRuntimeClient.builder()
                         .region(Region.of(bedrockRegion))
                         .credentialsProvider(DefaultCredentialsProvider.create())
+                        .httpClientBuilder(ApacheHttpClient.builder()
+                                .socketTimeout(Duration.ofSeconds(480)))
                         .build();
                 String modelId = bedrockModelId;
                 BedrockAIAdapter.ModelInvoker invoker = body -> {
