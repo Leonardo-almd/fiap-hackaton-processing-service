@@ -35,7 +35,7 @@ ai:
   # "stub" usa dados mockados (Fase 1 - SOAT). "bedrock" usa Amazon Bedrock (Fase 2 - IADT).
   adapter: ${AI_ADAPTER:stub}
   bedrock:
-    model-id: ${BEDROCK_MODEL_ID:anthropic.claude-3-sonnet-20240229-v1:0}
+    model-id: ${BEDROCK_MODEL_ID:anthropic.claude-sonnet-4-5-20250929-v1:0}
     region: ${BEDROCK_REGION:us-east-1}
 
 logging:

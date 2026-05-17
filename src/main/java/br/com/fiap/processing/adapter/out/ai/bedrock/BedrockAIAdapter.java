@@ -14,7 +14,7 @@ import java.util.Base64;
 import java.util.List;
 
 /**
- * Implementação de {@link AIAnalysisPort} que usa Amazon Bedrock (Claude 3 Sonnet)
+ * Implementação de {@link AIAnalysisPort} que usa Amazon Bedrock (Claude Sonnet 4.5)
  * para analisar diagramas de arquitetura e retornar riscos, componentes e recomendações.
  *
  * <p>Ativado via: {@code ai.adapter=bedrock}
@@ -50,7 +50,7 @@ public class BedrockAIAdapter implements AIAnalysisPort {
      *   <li>Schema com exemplos de valores para cada campo enum
      *   <li>Instrução explícita sobre nível de granularidade (arquitetural, não de código)
      *   <li>Tratamento de diagramas ilegíveis: retornar o melhor possível com os dados visíveis
-     *   <li>Ênfase em riscos de segurança, ponto forte do Claude 3
+    *   <li>Ênfase em riscos de segurança, ponto forte do Claude Sonnet 4.5
      * </ul>
      */
     private static final String SYSTEM_PROMPT = """

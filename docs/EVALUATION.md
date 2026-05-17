@@ -10,7 +10,7 @@ resultados observados e limitações conhecidas do modelo.
 | Campo | Valor |
 |---|---|
 | Provedor | Amazon Bedrock |
-| Modelo | Claude 3 Sonnet (`anthropic.claude-3-sonnet-20240229-v1:0`) |
+| Modelo | Claude Sonnet 4.5 (`anthropic.claude-sonnet-4-5-20250929-v1:0`) |
 | Temperatura | `0.2` (baixa para saídas determinísticas) |
 | Max tokens | `4096` |
 | Versão da API Anthropic | `bedrock-2023-05-31` |

@@ -31,7 +31,7 @@ public class AIAdapterConfig {
     @Value("${ai.adapter:stub}")
     private String aiAdapter;
 
-    @Value("${ai.bedrock.model-id:anthropic.claude-3-sonnet-20240229-v1:0}")
+    @Value("${ai.bedrock.model-id:anthropic.claude-sonnet-4-5-20250929-v1:0}")
     private String bedrockModelId;
 
     @Value("${ai.bedrock.region:us-east-1}")

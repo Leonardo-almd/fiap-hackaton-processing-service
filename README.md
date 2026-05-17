@@ -13,7 +13,7 @@ Microsserviço responsável por:
 O serviço usa o padrão **Strategy** para a integração com IA via a interface `AIAnalysisPort`:
 
 - **Fase 1 (SOAT)**: `StubAIAdapter` — retorna dados mockados com a estrutura real do relatório. Ativado com `AI_ADAPTER=stub`.
-- **Fase 2 (IADT)**: `BedrockAIAdapter` — integração com Amazon Bedrock (Claude 3 Sonnet). Ativado com `AI_ADAPTER=bedrock`.
+- **Fase 2 (IADT)**: `BedrockAIAdapter` — integração com Amazon Bedrock (Claude Sonnet 4.5). Ativado com `AI_ADAPTER=bedrock`.
 
 ## Estrutura (Arquitetura Hexagonal)
 
@@ -43,7 +43,7 @@ src/main/java/br/com/fiap/processing/
 ### Pré-requisitos
 
 1. **Conta AWS com acesso ao Amazon Bedrock habilitado** na região escolhida (`us-east-1` por padrão).
-2. **Modelo liberado**: no Console AWS → Amazon Bedrock → Model access → solicitar acesso ao modelo `Claude 3 Sonnet` (`anthropic.claude-3-sonnet-20240229-v1:0`). O acesso é gratuito para solicitar, mas pode levar alguns minutos para ser aprovado.
+2. **Modelo liberado**: no Console AWS → Amazon Bedrock → Model access → solicitar acesso ao modelo `Claude Sonnet 4.5` (`anthropic.claude-sonnet-4-5-20250929-v1:0`). O acesso é gratuito para solicitar, mas pode levar alguns minutos para ser aprovado.
 3. **Credenciais AWS** com a permissão `bedrock:InvokeModel` configuradas no ambiente (ver seção IAM abaixo).
 
 ### Permissões IAM necessárias
@@ -58,7 +58,7 @@ A task/role que executa o serviço precisa da seguinte política mínima:
       "Sid": "InvokeBedrockModel",
       "Effect": "Allow",
       "Action": "bedrock:InvokeModel",
-      "Resource": "arn:aws:bedrock:us-east-1::foundation-model/anthropic.claude-3-sonnet-20240229-v1:0"
+      "Resource": "arn:aws:bedrock:us-east-1::foundation-model/anthropic.claude-sonnet-4-5-20250929-v1:0"
     }
   ]
 }
@@ -71,7 +71,7 @@ A task/role que executa o serviço precisa da seguinte política mínima:
 | Variável | Valor para Bedrock | Descrição |
 |---|---|---|
 | `AI_ADAPTER` | `bedrock` | Ativa o `BedrockAIAdapter` no lugar do stub |
-| `BEDROCK_MODEL_ID` | `anthropic.claude-3-sonnet-20240229-v1:0` | ID do modelo no Bedrock |
+| `BEDROCK_MODEL_ID` | `anthropic.claude-sonnet-4-5-20250929-v1:0` | ID do modelo no Bedrock |
 | `BEDROCK_REGION` | `us-east-1` | Região onde o modelo está habilitado |
 
 ### Rodando localmente com Bedrock real
@@ -79,7 +79,7 @@ A task/role que executa o serviço precisa da seguinte política mínima:
 ```bash
 export AI_ADAPTER=bedrock
 export BEDROCK_REGION=us-east-1
-export BEDROCK_MODEL_ID=anthropic.claude-3-sonnet-20240229-v1:0
+export BEDROCK_MODEL_ID=anthropic.claude-sonnet-4-5-20250929-v1:0
 
 # Credenciais AWS (perfil local ou variáveis de ambiente)
 export AWS_ACCESS_KEY_ID=<sua_access_key>
@@ -102,7 +102,7 @@ services:
     environment:
       AI_ADAPTER: bedrock
       BEDROCK_REGION: us-east-1
-      BEDROCK_MODEL_ID: anthropic.claude-3-sonnet-20240229-v1:0
+      BEDROCK_MODEL_ID: anthropic.claude-sonnet-4-5-20250929-v1:0
       AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
 ```
@@ -129,7 +129,7 @@ Se o adapter ainda for o stub, a mensagem será `StubAIAdapter: simulando análi
 #### `AccessDeniedException` ao invocar o modelo
 
 Causas comuns:
-- Modelo não habilitado na conta: acesse AWS Console → Amazon Bedrock → Model access e habilite `Claude 3 Sonnet`.
+- Modelo não habilitado na conta: acesse AWS Console → Amazon Bedrock → Model access e habilite `Claude Sonnet 4.5`.
 - IAM sem permissão `bedrock:InvokeModel`: revise a política da Task Role.
 - Região errada: `BEDROCK_REGION` deve corresponder à região onde o acesso foi concedido.
 
@@ -306,5 +306,5 @@ Ou seja, sim: o arquivo `fiap-processing-service/Dockerfile` eh o usado pelo Com
 | `UPLOAD_SERVICE_BASE_URL` | `http://localhost:8080` | URL do upload-service |
 | `REPORT_SERVICE_BASE_URL` | `http://localhost:8082` | URL do report-service |
 | `AI_ADAPTER` | `stub` | `stub` (fase 1) ou `bedrock` (fase 2) |
-| `BEDROCK_MODEL_ID` | `anthropic.claude-3-sonnet-20240229-v1:0` | ID do modelo no Bedrock |
+| `BEDROCK_MODEL_ID` | `anthropic.claude-sonnet-4-5-20250929-v1:0` | ID do modelo no Bedrock |
 | `BEDROCK_REGION` | `us-east-1` | Região onde o acesso ao modelo foi habilitado |
