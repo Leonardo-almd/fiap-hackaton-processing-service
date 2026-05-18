@@ -30,7 +30,7 @@ public class BedrockAIAdapter implements AIAnalysisPort {
     private static final Logger log = LoggerFactory.getLogger(BedrockAIAdapter.class);
 
     private static final String ANTHROPIC_VERSION = "bedrock-2023-05-31";
-    private static final int MAX_TOKENS = 4096;
+    private static final int MAX_TOKENS = 8192;
     // Temperatura baixa para saídas determinísticas e bem estruturadas
     private static final double TEMPERATURE = 0.2;
     private static final String MEDIA_TYPE_PNG = "image/png";
