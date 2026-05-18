@@ -306,5 +306,5 @@ Ou seja, sim: o arquivo `fiap-processing-service/Dockerfile` eh o usado pelo Com
 | `UPLOAD_SERVICE_BASE_URL` | `http://localhost:8080` | URL do upload-service |
 | `REPORT_SERVICE_BASE_URL` | `http://localhost:8082` | URL do report-service |
 | `AI_ADAPTER` | `stub` | `stub` (fase 1) ou `bedrock` (fase 2) |
-| `BEDROCK_MODEL_ID` | `anthropic.claude-sonnet-4-5-20250929-v1:0` | ID do modelo no Bedrock |
+| `BEDROCK_MODEL_ID` | `global.anthropic.claude-sonnet-4-5-20250929-v1:0` | ID completo do modelo no Bedrock |
 | `BEDROCK_REGION` | `us-east-1` | Região onde o acesso ao modelo foi habilitado |
