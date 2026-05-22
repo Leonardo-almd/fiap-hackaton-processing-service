@@ -1,4 +1,4 @@
-# fiap-processing-service
+# fiap-hackaton-processing-service
 
 Microsserviço responsável por:
 - Consumir mensagens da fila AWS SQS
@@ -43,7 +43,7 @@ src/main/java/br/com/fiap/processing/
 ### Pré-requisitos
 
 1. **Conta AWS com acesso ao Amazon Bedrock habilitado** na região escolhida (`us-east-1` por padrão).
-2. **Modelo liberado**: no Console AWS → Amazon Bedrock → Model access → solicitar acesso ao modelo `Claude Sonnet 4.5` (`anthropic.claude-sonnet-4-5-20250929-v1:0`). O acesso é gratuito para solicitar, mas pode levar alguns minutos para ser aprovado.
+2. **Modelo liberado**: no Console AWS → Amazon Bedrock → Model access → solicitar acesso ao modelo `Claude Sonnet 4.5` (`anthropic.claude-sonnet-4-5-20250929-v1:0`). Para chamadas cross-region, o `BEDROCK_MODEL_ID` usa prefixo (ex: `global.`).
 3. **Credenciais AWS** com a permissão `bedrock:InvokeModel` configuradas no ambiente (ver seção IAM abaixo).
 
 ### Permissões IAM necessárias
@@ -58,7 +58,11 @@ A task/role que executa o serviço precisa da seguinte política mínima:
       "Sid": "InvokeBedrockModel",
       "Effect": "Allow",
       "Action": "bedrock:InvokeModel",
-      "Resource": "arn:aws:bedrock:us-east-1::foundation-model/anthropic.claude-sonnet-4-5-20250929-v1:0"
+      "Resource": [
+        "arn:aws:bedrock:us-east-1:<account-id>:inference-profile/global.anthropic.claude-sonnet-4-5-20250929-v1:0",
+        "arn:aws:bedrock:us-east-1::foundation-model/anthropic.claude-sonnet-4-5-20250929-v1:0",
+        "arn:aws:bedrock:::foundation-model/anthropic.claude-sonnet-4-5-20250929-v1:0"
+      ]
     }
   ]
 }
@@ -71,7 +75,9 @@ A task/role que executa o serviço precisa da seguinte política mínima:
 | Variável | Valor para Bedrock | Descrição |
 |---|---|---|
 | `AI_ADAPTER` | `bedrock` | Ativa o `BedrockAIAdapter` no lugar do stub |
-| `BEDROCK_MODEL_ID` | `anthropic.claude-sonnet-4-5-20250929-v1:0` | ID do modelo no Bedrock |
+| `BEDROCK_MODEL_ID` | `global.anthropic.claude-sonnet-4-5-20250929-v1:0` | ID completo do modelo no Bedrock |
+| `BEDROCK_MODEL_ID_BASE` | `anthropic.claude-sonnet-4-5-20250929-v1:0` | ID base do modelo (sem prefixo) |
+| `BEDROCK_MODEL_ID_PREFIX` | `global` | Prefixo cross-region do modelo (ex: global, us) |
 | `BEDROCK_REGION` | `us-east-1` | Região onde o modelo está habilitado |
 
 ### Rodando localmente com Bedrock real
@@ -79,7 +85,9 @@ A task/role que executa o serviço precisa da seguinte política mínima:
 ```bash
 export AI_ADAPTER=bedrock
 export BEDROCK_REGION=us-east-1
-export BEDROCK_MODEL_ID=anthropic.claude-sonnet-4-5-20250929-v1:0
+export BEDROCK_MODEL_ID=global.anthropic.claude-sonnet-4-5-20250929-v1:0
+export BEDROCK_MODEL_ID_BASE=anthropic.claude-sonnet-4-5-20250929-v1:0
+export BEDROCK_MODEL_ID_PREFIX=global
 
 # Credenciais AWS (perfil local ou variáveis de ambiente)
 export AWS_ACCESS_KEY_ID=<sua_access_key>
@@ -94,7 +102,7 @@ mvn spring-boot:run
 
 ### Rodando com Docker Compose + Bedrock real
 
-No `docker-compose.override.yml` (crie na raiz do `fiap-infrastructure` se não existir):
+No `docker-compose.override.yml` (crie na raiz do `fiap-hackaton-infrastructure` se não existir):
 
 ```yaml
 services:
@@ -102,7 +110,9 @@ services:
     environment:
       AI_ADAPTER: bedrock
       BEDROCK_REGION: us-east-1
-      BEDROCK_MODEL_ID: anthropic.claude-sonnet-4-5-20250929-v1:0
+      BEDROCK_MODEL_ID: global.anthropic.claude-sonnet-4-5-20250929-v1:0
+      BEDROCK_MODEL_ID_BASE: anthropic.claude-sonnet-4-5-20250929-v1:0
+      BEDROCK_MODEL_ID_PREFIX: global
       AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
 ```
@@ -154,7 +164,7 @@ mvn test
 
 ## Como rodar com Docker Compose
 
-Este serviço eh executado via `docker compose` no repositório `fiap-infrastructure`.
+Este serviço eh executado via `docker compose` no repositório `fiap-hackaton-infrastructure`.
 Para o fluxo do `processing-service`, os seguintes serviços devem estar ativos:
 - `localstack` (S3 + SQS)
 - `upload-db` + `upload-service`
@@ -169,18 +179,18 @@ Para o fluxo do `processing-service`, os seguintes serviços devem estar ativos:
 
 ```text
 Hackaton/
-├── fiap-upload-service/
-├── fiap-processing-service/
-├── fiap-report-service/
-└── fiap-infrastructure/
+├── fiap-hackaton-upload-service/
+├── fiap-hackaton-processing-service/
+├── fiap-hackaton-report-service/
+└── fiap-hackaton-infrastructure/
 ```
 
 ### 2) Subir stack completa para processamento
 
-No diretório `fiap-infrastructure`:
+No diretório `fiap-hackaton-infrastructure`:
 
 ```bash
-cd ../fiap-infrastructure
+cd ../fiap-hackaton-infrastructure
 docker compose up -d localstack upload-db report-db upload-service report-service processing-service
 ```
 
@@ -224,7 +234,7 @@ curl "http://localhost:8082/v1/reports/<jobId>"
 
 ### 5) Rebuild do processing-service após alterar código
 
-No `fiap-infrastructure`:
+No `fiap-hackaton-infrastructure`:
 
 ```bash
 docker compose up -d --build processing-service
@@ -284,16 +294,16 @@ Valide:
 
 #### Confirmar que o Compose usa o Dockerfile correto
 
-No `fiap-infrastructure/docker-compose.yml`:
+No `fiap-hackaton-infrastructure/docker-compose.yml`:
 
 ```yaml
 processing-service:
   build:
-    context: ../fiap-processing-service
+    context: ../fiap-hackaton-processing-service
     dockerfile: Dockerfile
 ```
 
-Ou seja, sim: o arquivo `fiap-processing-service/Dockerfile` eh o usado pelo Compose.
+Ou seja, sim: o arquivo `fiap-hackaton-processing-service/Dockerfile` eh o usado pelo Compose.
 
 ## Variáveis de ambiente
 
@@ -307,4 +317,6 @@ Ou seja, sim: o arquivo `fiap-processing-service/Dockerfile` eh o usado pelo Com
 | `REPORT_SERVICE_BASE_URL` | `http://localhost:8082` | URL do report-service |
 | `AI_ADAPTER` | `stub` | `stub` (fase 1) ou `bedrock` (fase 2) |
 | `BEDROCK_MODEL_ID` | `global.anthropic.claude-sonnet-4-5-20250929-v1:0` | ID completo do modelo no Bedrock |
+| `BEDROCK_MODEL_ID_BASE` | `anthropic.claude-sonnet-4-5-20250929-v1:0` | ID base do modelo (sem prefixo) |
+| `BEDROCK_MODEL_ID_PREFIX` | `global` | Prefixo cross-region do modelo (ex: global, us) |
 | `BEDROCK_REGION` | `us-east-1` | Região onde o acesso ao modelo foi habilitado |
